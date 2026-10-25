@@ -1,0 +1,503 @@
+openapi: 3.0.0
+info:
+  title: API del Microservicio de Gestión de Funcionarios
+  description: |
+    Especificación de la API para el Microservicio de Gestión de Funcionarios,
+    encargado de la información básica del personal y sus dependientes.
+  version: 1.0.0
+servers:
+  - url: https://api.rrhh.com/funcionarios/v1
+tags:
+  - name: Gestión de Funcionarios
+    description: Encargado de la información básica del personal.
+  - name: Gestión de Hijos
+    description: Gestión de dependientes.
+paths:
+  /funcionarios:
+    get:
+      tags:
+        - Gestión de Funcionarios
+      summary: Obtener la lista de todos los funcionarios
+      responses:
+        '200':
+          description: Lista de funcionarios obtenida exitosamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Funcionario'
+    post:
+      tags:
+        - Gestión de Funcionarios
+      summary: Crear un nuevo funcionario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuncionarioPost'
+      responses:
+        '201':
+          description: Funcionario creado exitosamente.
+        '400':
+          description: Datos de entrada inválidos.
+  /funcionarios/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del funcionario.
+    get:
+      tags:
+        - Gestión de Funcionarios
+      summary: Obtener un funcionario por ID
+      responses:
+        '200':
+          description: Funcionario encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '404':
+          description: Funcionario no encontrado.
+    patch:
+      tags:
+        - Gestión de Funcionarios
+      summary: Actualizar parcialmente un funcionario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuncionarioPatch'
+      responses:
+        '200':
+          description: Funcionario actualizado exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '400':
+          description: Datos de entrada inválidos.
+        '404':
+          description: Funcionario no encontrado.
+    delete:
+      tags:
+        - Gestión de Funcionarios
+      summary: Eliminar un funcionario por ID
+      responses:
+        '204':
+          description: Funcionario eliminado exitosamente.
+        '404':
+          description: Funcionario no encontrado.
+  /hijos:
+    get:
+      tags:
+        - Gestión de Hijos
+      summary: Obtener lista de hijos
+      responses:
+        '200':
+          description: Lista de hijos obtenida.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Hijo'
+    post:
+      tags:
+        - Gestión de Hijos
+      summary: Crear un nuevo registro de hijo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HijoPost'
+      responses:
+        '201':
+          description: Hijo creado.
+        '400':
+          description: Datos de entrada inválidos.
+  /hijos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          description: ID del hijo.
+    get:
+      tags:
+        - Gestión de Hijos
+      summary: Obtener un hijo por ID
+      responses:
+        '200':
+          description: Hijo encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hijo'
+        '404':
+          description: Hijo no encontrado.
+    patch:
+      tags:
+        - Gestión de Hijos
+      summary: Actualizar parcialmente un registro de hijo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HijoPatch'
+      responses:
+        '200':
+          description: Hijo actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hijo'
+        '400':
+          description: Datos de entrada inválidos.
+        '404':
+          description: Hijo no encontrado.
+    delete:
+      tags:
+        - Gestión de Hijos
+      summary: Eliminar un registro de hijo
+      responses:
+        '204':
+          description: Hijo eliminado.
+        '404':
+          description: Hijo no encontrado.
+components:
+  schemas:
+    Funcionario:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: ID único del funcionario.
+        numero_documento:
+          type: string
+          description: Número de identificación del funcionario.
+        pais_documento_id:
+          type: integer
+          description: ID del país emisor del documento.
+        pais_origen_id:
+          type: integer
+          description: ID del país de origen o nacionalidad.
+        estado_civil:
+          type: string
+          enum:
+            - casado
+            - soltero
+            - viudo
+            - union_de_hecho
+          description: Estado civil del funcionario.
+        fecha_ingreso:
+          type: string
+          format: date
+          description: Fecha en que el funcionario ingresó a la empresa.
+        direccion:
+          type: string
+          description: Dirección de residencia del funcionario.
+        ciudad_id:
+          type: integer
+          description: ID de la ciudad donde reside el funcionario.
+        correo_electronico:
+          type: string
+          format: email
+          description: Correo electrónico del funcionario.
+        fecha_ingreso_seguro_social:
+          type: string
+          format: date
+          description: Fecha de ingreso al seguro social.
+        fecha_egreso:
+          type: string
+          format: date
+          description: Fecha de egreso de la empresa.
+        estado:
+          type: string
+          enum:
+            - activo
+            - inactivo
+          description: Estado actual del funcionario.
+        numero_cuenta_bancaria:
+          type: string
+          description: Número de cuenta bancaria del funcionario.
+        tipo_contrato_id:
+          type: integer
+          description: ID del tipo de contrato.
+        cargo_id:
+          type: integer
+          description: ID del cargo actual.
+        fecha_asuncion_cargo:
+          type: string
+          format: date
+          description: Fecha de inicio en el cargo actual.
+        horario_ingreso:
+          type: string
+          format: time
+          description: Horario de ingreso.
+        horario_salida:
+          type: string
+          format: time
+          description: Horario de salida.
+        dias_laborales:
+          type: string
+          description: Días laborables de la semana.
+        telefono:
+          type: string
+          description: Número de teléfono.
+        contacto_emergencia:
+          type: string
+          description: Contacto de emergencia.
+      required:
+        - numero_documento
+        - pais_documento_id
+        - pais_origen_id
+        - fecha_ingreso
+        - estado
+        - telefono
+
+    FuncionarioPost:
+      type: object
+      properties:
+        numero_documento:
+          type: string
+          description: Número de identificación del funcionario.
+        pais_documento_id:
+          type: integer
+          description: ID del país emisor del documento.
+        pais_origen_id:
+          type: integer
+          description: ID del país de origen o nacionalidad.
+        estado_civil:
+          type: string
+          enum:
+            - casado
+            - soltero
+            - viudo
+            - union_de_hecho
+          description: Estado civil del funcionario.
+        fecha_ingreso:
+          type: string
+          format: date
+          description: Fecha en que el funcionario ingresó a la empresa.
+        direccion:
+          type: string
+          description: Dirección de residencia del funcionario.
+        ciudad_id:
+          type: integer
+          description: ID de la ciudad donde reside el funcionario.
+        correo_electronico:
+          type: string
+          format: email
+          description: Correo electrónico del funcionario.
+        fecha_ingreso_seguro_social:
+          type: string
+          format: date
+          description: Fecha de ingreso al seguro social.
+        fecha_egreso:
+          type: string
+          format: date
+          description: Fecha de egreso de la empresa.
+        estado:
+          type: string
+          enum:
+            - activo
+            - inactivo
+          description: Estado actual del funcionario.
+        numero_cuenta_bancaria:
+          type: string
+          description: Número de cuenta bancaria del funcionario.
+        tipo_contrato_id:
+          type: integer
+          description: ID del tipo de contrato.
+        cargo_id:
+          type: integer
+          description: ID del cargo actual.
+        fecha_asuncion_cargo:
+          type: string
+          format: date
+          description: Fecha de inicio en el cargo actual.
+        horario_ingreso:
+          type: string
+          format: time
+          description: Horario de ingreso.
+        horario_salida:
+          type: string
+          format: time
+          description: Horario de salida.
+        dias_laborales:
+          type: string
+          description: Días laborables de la semana.
+        telefono:
+          type: string
+          description: Número de teléfono.
+        contacto_emergencia:
+          type: string
+          description: Contacto de emergencia.
+      required:
+        - numero_documento
+        - pais_documento_id
+        - pais_origen_id
+        - fecha_ingreso
+        - estado
+        - telefono
+
+    FuncionarioPatch:
+      type: object
+      properties:
+        numero_documento:
+          type: string
+          description: Número de identificación del funcionario.
+        pais_documento_id:
+          type: integer
+          description: ID del país emisor del documento.
+        pais_origen_id:
+          type: integer
+          description: ID del país de origen o nacionalidad.
+        estado_civil:
+          type: string
+          enum:
+            - casado
+            - soltero
+            - viudo
+            - union_de_hecho
+          description: Estado civil del funcionario.
+        fecha_ingreso:
+          type: string
+          format: date
+          description: Fecha en que el funcionario ingresó a la empresa.
+        direccion:
+          type: string
+          description: Dirección de residencia del funcionario.
+        ciudad_id:
+          type: integer
+          description: ID de la ciudad donde reside el funcionario.
+        correo_electronico:
+          type: string
+          format: email
+          description: Correo electrónico del funcionario.
+        fecha_ingreso_seguro_social:
+          type: string
+          format: date
+          description: Fecha de ingreso al seguro social.
+        fecha_egreso:
+          type: string
+          format: date
+          description: Fecha de egreso de la empresa.
+        estado:
+          type: string
+          enum:
+            - activo
+            - inactivo
+          description: Estado actual del funcionario.
+        numero_cuenta_bancaria:
+          type: string
+          description: Número de cuenta bancaria del funcionario.
+        tipo_contrato_id:
+          type: integer
+          description: ID del tipo de contrato.
+        cargo_id:
+          type: integer
+          description: ID del cargo actual.
+        fecha_asuncion_cargo:
+          type: string
+          format: date
+          description: Fecha de inicio en el cargo actual.
+        horario_ingreso:
+          type: string
+          format: time
+          description: Horario de ingreso.
+        horario_salida:
+          type: string
+          format: time
+          description: Horario de salida.
+        dias_laborales:
+          type: string
+          description: Días laborables de la semana.
+        telefono:
+          type: string
+          description: Número de teléfono.
+        contacto_emergencia:
+          type: string
+          description: Contacto de emergencia.
+
+    Hijo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: ID único del registro del hijo.
+        funcionario_id:
+          type: integer
+          description: ID del funcionario asociado al hijo.
+        nombre:
+          type: string
+          description: Nombre del hijo.
+        fecha_nacimiento:
+          type: string
+          format: date
+          description: Fecha de nacimiento del hijo.
+        documento:
+          type: string
+          description: Número de documento de identificación del hijo.
+        apto_bonificacion:
+          type: boolean
+          description: Indica si el hijo es apto para bonificaciones.
+      required:
+        - funcionario_id
+        - nombre
+        - fecha_nacimiento
+
+    HijoPost:
+      type: object
+      properties:
+        funcionario_id:
+          type: integer
+          description: ID del funcionario asociado al hijo.
+        nombre:
+          type: string
+          description: Nombre del hijo.
+        fecha_nacimiento:
+          type: string
+          format: date
+          description: Fecha de nacimiento del hijo.
+        documento:
+          type: string
+          description: Número de documento de identificación del hijo.
+        apto_bonificacion:
+          type: boolean
+          description: Indica si el hijo es apto para bonificaciones.
+      required:
+        - funcionario_id
+        - nombre
+        - fecha_nacimiento
+
+    HijoPatch:
+      type: object
+      properties:
+        funcionario_id:
+          type: integer
+          description: ID del funcionario asociado al hijo.
+        nombre:
+          type: string
+          description: Nombre del hijo.
+        fecha_nacimiento:
+          type: string
+          format: date
+          description: Fecha de nacimiento del hijo.
+        documento:
+          type: string
+          description: Número de documento de identificación del hijo.
+        apto_bonificacion:
+          type: boolean
+          description: Indica si el hijo es apto para bonificaciones.
