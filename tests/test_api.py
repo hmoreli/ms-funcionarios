@@ -1,6 +1,6 @@
 from datetime import date
 
-from tests.conftest import CONSULTA, OPERADOR, encabezado
+from tests.conftest import CONSULTA, OPERADOR, encabezado, validador_simulado
 
 BASE = {
     "numero_documento": "4567890",
@@ -135,3 +135,17 @@ def test_busqueda_por_nombre_o_documento(cliente):
 def test_sin_nombres_es_invalido(cliente):
     datos = {k: v for k, v in BASE.items() if k != "nombres"}
     assert cliente.post("/funcionarios", json=datos, headers=OPERADOR).status_code == 422
+
+
+def test_valida_ids_de_ms_organizacion(cliente):
+    cliente.app.state.referencias = validador_simulado("ms-organizacion/paises/1")
+    alta(cliente)
+    r = cliente.post(
+        "/funcionarios",
+        json={**BASE, "numero_documento": "1", "pais_origen_id": 7},
+        headers=OPERADOR,
+    )
+    assert r.status_code == 422
+    assert r.json()["detalles"] == [
+        {"campo": "body.pais_origen_id", "mensaje": "No existe el país 7"}
+    ]

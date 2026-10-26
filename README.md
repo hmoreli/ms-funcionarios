@@ -13,6 +13,7 @@ Implementa el contrato [`contrato/openapi.yaml`](contrato/openapi.yaml) con Fast
 - La cuenta bancaria solo la ven `rrhh-operador` y `nomina-liquidador`; al resto le llega vacía.
 - Valida email, `fecha_egreso >= fecha_ingreso` y documento único (409 si se repite).
 - Los `*_id` de país, ciudad y tipo de contrato son de ms-organizacion: no hay FK física entre servicios.
+- Los ids de otros servicios (país, ciudad y tipo de contrato) se verifican con el servicio dueño antes de guardar: 422 si no existe, 503 si no responde. Usa el client `ms-funcionarios` de Keycloak (`SERVICIO_CLIENT_ID`/`SERVICIO_CLIENT_SECRET`); sin esas variables, como en las pruebas, no se verifica.
 
 ## Desarrollo
 

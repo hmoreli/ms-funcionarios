@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app import esquemas as e
 from app import modelos as m
 from app.db import obtener_sesion
+from app.referencias import FUNCIONARIO
 
 # Roles que pueden ver la cuenta bancaria; el resto (p. ej. consulta) la recibe vacía.
 ROLES_CUENTA = ("rrhh-operador", "nomina-liquidador")
@@ -23,6 +24,7 @@ funcionarios = router_crud(
     etiqueta="Gestión de Funcionarios",
     nombre="Funcionario",
     sesion=obtener_sesion,
+    referencias=FUNCIONARIO,
     # Los listados se arman abajo (ocultan la cuenta bancaria según el rol);
     # DELETE se reemplaza por una baja lógica.
     metodos={"crear", "actualizar"},
