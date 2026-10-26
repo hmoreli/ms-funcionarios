@@ -1,9 +1,11 @@
 from datetime import date
 
-from tests.conftest import CONSULTA, OPERADOR
+from tests.conftest import CONSULTA, OPERADOR, encabezado
 
 BASE = {
     "numero_documento": "4567890",
+    "nombres": "Ana María",
+    "apellidos": "Benítez Gómez",
     "pais_documento_id": 1,
     "pais_origen_id": 1,
     "fecha_ingreso": "2024-03-01",
@@ -22,12 +24,11 @@ def test_alta_y_consulta(cliente):
     f = alta(
         cliente,
         estado_civil="casado",
-        horario_ingreso="07:30:00",
         correo_electronico="ana@example.com",
     )
     r = cliente.get(f"/funcionarios/{f['id']}", headers=CONSULTA)
     assert r.json()["estado_civil"] == "casado"
-    assert r.json()["horario_ingreso"] == "07:30:00"
+    assert r.json()["apellidos"] == "Benítez Gómez"
 
 
 def test_documento_duplicado_409(cliente):
@@ -101,3 +102,36 @@ def test_rutas_del_contrato_existen(cliente):
     rutas = cliente.get("/openapi.json").json()["paths"]
     assert {"/funcionarios", "/funcionarios/{id}", "/hijos", "/hijos/{id}"} <= set(rutas)
     assert {"get", "patch", "delete"} <= set(rutas["/funcionarios/{id}"])
+
+
+def test_cuenta_bancaria_solo_para_rrhh_y_nomina(cliente):
+    f = alta(cliente, numero_cuenta_bancaria="000-123456-7")
+    nomina = encabezado("nomina-liquidador")
+    assert (
+        cliente.get(f"/funcionarios/{f['id']}", headers=OPERADOR).json()["numero_cuenta_bancaria"]
+        == "000-123456-7"
+    )
+    assert cliente.get("/funcionarios", headers=nomina).json()[0]["numero_cuenta_bancaria"]
+    assert (
+        cliente.get(f"/funcionarios/{f['id']}", headers=CONSULTA).json()["numero_cuenta_bancaria"]
+        is None
+    )
+    assert (
+        cliente.get("/funcionarios", headers=CONSULTA).json()[0]["numero_cuenta_bancaria"] is None
+    )
+
+
+def test_busqueda_por_nombre_o_documento(cliente):
+    alta(cliente, numero_documento="111", nombres="Juan", apellidos="Pérez")
+    alta(cliente, numero_documento="222", nombres="Rosa", apellidos="Juanes")
+    alta(cliente, numero_documento="333", nombres="Luis", apellidos="Ortiz")
+    juan = cliente.get("/funcionarios?q=juan", headers=CONSULTA).json()
+    assert [f["numero_documento"] for f in juan] == ["111", "222"]
+    assert [f["nombres"] for f in cliente.get("/funcionarios?q=33", headers=CONSULTA).json()] == [
+        "Luis"
+    ]
+
+
+def test_sin_nombres_es_invalido(cliente):
+    datos = {k: v for k, v in BASE.items() if k != "nombres"}
+    assert cliente.post("/funcionarios", json=datos, headers=OPERADOR).status_code == 422

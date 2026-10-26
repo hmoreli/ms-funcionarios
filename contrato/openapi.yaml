@@ -1,36 +1,17 @@
-openapi: 3.0.0
+# Generado desde el código (app.openapi()). No editar a mano.
+openapi: 3.1.0
 info:
-  title: API del Microservicio de Gestión de Funcionarios
-  description: |
-    Especificación de la API para el Microservicio de Gestión de Funcionarios,
-    encargado de la información básica del personal y sus dependientes.
+  title: Microservicio de Gestión de Funcionarios
   version: 1.0.0
-servers:
-  - url: https://api.rrhh.com/funcionarios/v1
-tags:
-  - name: Gestión de Funcionarios
-    description: Encargado de la información básica del personal.
-  - name: Gestión de Hijos
-    description: Gestión de dependientes.
 paths:
   /funcionarios:
-    get:
-      tags:
-        - Gestión de Funcionarios
-      summary: Obtener la lista de todos los funcionarios
-      responses:
-        '200':
-          description: Lista de funcionarios obtenida exitosamente.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Funcionario'
     post:
       tags:
-        - Gestión de Funcionarios
-      summary: Crear un nuevo funcionario
+      - Gestión de Funcionarios
+      summary: Crear funcionario
+      operationId: crear__funcionarios_post
+      security:
+      - HTTPBearer: []
       requestBody:
         required: true
         content:
@@ -39,34 +20,104 @@ paths:
               $ref: '#/components/schemas/FuncionarioPost'
       responses:
         '201':
-          description: Funcionario creado exitosamente.
-        '400':
-          description: Datos de entrada inválidos.
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Gestión de Funcionarios
+      summary: Listar funcionarios
+      operationId: listar_funcionarios_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: estado
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoFuncionario'
+          - type: 'null'
+          title: Estado
+      - name: numero_documento
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Numero Documento
+      - name: q
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          description: Buscar en nombres, apellidos y número de documento
+          title: Q
+        description: Buscar en nombres, apellidos y número de documento
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Cantidad de registros
+          default: 50
+          title: Limit
+        description: Cantidad de registros
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Registros a saltear
+          default: 0
+          title: Offset
+        description: Registros a saltear
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Funcionario'
+                title: Response Listar Funcionarios Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /funcionarios/{id}:
-    parameters:
+    patch:
+      tags:
+      - Gestión de Funcionarios
+      summary: Actualizar funcionario
+      operationId: actualizar_funcionarios__id__patch
+      security:
+      - HTTPBearer: []
+      parameters:
       - name: id
         in: path
         required: true
         schema:
           type: integer
-        description: ID del funcionario.
-    get:
-      tags:
-        - Gestión de Funcionarios
-      summary: Obtener un funcionario por ID
-      responses:
-        '200':
-          description: Funcionario encontrado.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Funcionario'
-        '404':
-          description: Funcionario no encontrado.
-    patch:
-      tags:
-        - Gestión de Funcionarios
-      summary: Actualizar parcialmente un funcionario
+          title: Id
       requestBody:
         required: true
         content:
@@ -75,42 +126,133 @@ paths:
               $ref: '#/components/schemas/FuncionarioPatch'
       responses:
         '200':
-          description: Funcionario actualizado exitosamente.
+          description: Successful Response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Funcionario'
-        '400':
-          description: Datos de entrada inválidos.
-        '404':
-          description: Funcionario no encontrado.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Gestión de Funcionarios
+      summary: Obtener funcionario por ID
+      operationId: obtener_funcionarios__id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-        - Gestión de Funcionarios
-      summary: Eliminar un funcionario por ID
+      - Gestión de Funcionarios
+      summary: Dar de baja un funcionario
+      description: 'No borra el legajo: lo pasa a `inactivo` y completa `fecha_egreso` con hoy si
+
+        estaba vacía. Así no se pierde el historial que usan nómina y vacaciones.'
+      operationId: dar_de_baja_funcionarios__id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
       responses:
         '204':
-          description: Funcionario eliminado exitosamente.
-        '404':
-          description: Funcionario no encontrado.
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /hijos:
     get:
       tags:
-        - Gestión de Hijos
-      summary: Obtener lista de hijos
+      - Gestión de Hijos
+      summary: Listar hijos
+      operationId: listar_hijos_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Cantidad de registros
+          default: 50
+          title: Limit
+        description: Cantidad de registros
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Registros a saltear
+          default: 0
+          title: Offset
+        description: Registros a saltear
+      - name: funcionario_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Filtrar por funcionario_id
+          title: Funcionario Id
+        description: Filtrar por funcionario_id
       responses:
         '200':
-          description: Lista de hijos obtenida.
+          description: Successful Response
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Hijo'
+                title: Response Listar Hijos Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
     post:
       tags:
-        - Gestión de Hijos
-      summary: Crear un nuevo registro de hijo
+      - Gestión de Hijos
+      summary: Crear hijo
+      operationId: crear__hijos_post
+      security:
+      - HTTPBearer: []
       requestBody:
         required: true
         content:
@@ -119,34 +261,59 @@ paths:
               $ref: '#/components/schemas/HijoPost'
       responses:
         '201':
-          description: Hijo creado.
-        '400':
-          description: Datos de entrada inválidos.
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hijo'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /hijos/{id}:
-    parameters:
+    get:
+      tags:
+      - Gestión de Hijos
+      summary: Obtener hijo por ID
+      operationId: obtener_hijos__id__get
+      security:
+      - HTTPBearer: []
+      parameters:
       - name: id
         in: path
         required: true
         schema:
           type: integer
-          description: ID del hijo.
-    get:
-      tags:
-        - Gestión de Hijos
-      summary: Obtener un hijo por ID
+          title: Id
       responses:
         '200':
-          description: Hijo encontrado.
+          description: Successful Response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Hijo'
-        '404':
-          description: Hijo no encontrado.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
     patch:
       tags:
-        - Gestión de Hijos
-      summary: Actualizar parcialmente un registro de hijo
+      - Gestión de Hijos
+      summary: Actualizar hijo
+      operationId: actualizar_hijos__id__patch
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
       requestBody:
         required: true
         content:
@@ -155,349 +322,484 @@ paths:
               $ref: '#/components/schemas/HijoPatch'
       responses:
         '200':
-          description: Hijo actualizado.
+          description: Successful Response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Hijo'
-        '400':
-          description: Datos de entrada inválidos.
-        '404':
-          description: Hijo no encontrado.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-        - Gestión de Hijos
-      summary: Eliminar un registro de hijo
+      - Gestión de Hijos
+      summary: Eliminar hijo
+      operationId: eliminar_hijos__id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
       responses:
         '204':
-          description: Hijo eliminado.
-        '404':
-          description: Hijo no encontrado.
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    EstadoCivil:
+      type: string
+      enum:
+      - casado
+      - soltero
+      - viudo
+      - union_de_hecho
+      title: EstadoCivil
+    EstadoFuncionario:
+      type: string
+      enum:
+      - activo
+      - inactivo
+      title: EstadoFuncionario
     Funcionario:
-      type: object
       properties:
+        estado_civil:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoCivil'
+          - type: 'null'
+        direccion:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Direccion
+        ciudad_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ciudad Id
+        correo_electronico:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Correo Electronico
+        fecha_ingreso_seguro_social:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso Seguro Social
+        fecha_egreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Egreso
+        numero_cuenta_bancaria:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Numero Cuenta Bancaria
+        tipo_contrato_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tipo Contrato Id
+        contacto_emergencia:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Contacto Emergencia
         id:
           type: integer
-          format: int32
-          description: ID único del funcionario.
+          title: Id
         numero_documento:
           type: string
-          description: Número de identificación del funcionario.
+          title: Numero Documento
+        nombres:
+          type: string
+          title: Nombres
+        apellidos:
+          type: string
+          title: Apellidos
         pais_documento_id:
           type: integer
-          description: ID del país emisor del documento.
+          title: Pais Documento Id
         pais_origen_id:
           type: integer
-          description: ID del país de origen o nacionalidad.
-        estado_civil:
-          type: string
-          enum:
-            - casado
-            - soltero
-            - viudo
-            - union_de_hecho
-          description: Estado civil del funcionario.
+          title: Pais Origen Id
         fecha_ingreso:
           type: string
           format: date
-          description: Fecha en que el funcionario ingresó a la empresa.
-        direccion:
-          type: string
-          description: Dirección de residencia del funcionario.
-        ciudad_id:
-          type: integer
-          description: ID de la ciudad donde reside el funcionario.
-        correo_electronico:
-          type: string
-          format: email
-          description: Correo electrónico del funcionario.
-        fecha_ingreso_seguro_social:
-          type: string
-          format: date
-          description: Fecha de ingreso al seguro social.
-        fecha_egreso:
-          type: string
-          format: date
-          description: Fecha de egreso de la empresa.
+          title: Fecha Ingreso
         estado:
-          type: string
-          enum:
-            - activo
-            - inactivo
-          description: Estado actual del funcionario.
-        numero_cuenta_bancaria:
-          type: string
-          description: Número de cuenta bancaria del funcionario.
-        tipo_contrato_id:
-          type: integer
-          description: ID del tipo de contrato.
-        cargo_id:
-          type: integer
-          description: ID del cargo actual.
-        fecha_asuncion_cargo:
-          type: string
-          format: date
-          description: Fecha de inicio en el cargo actual.
-        horario_ingreso:
-          type: string
-          format: time
-          description: Horario de ingreso.
-        horario_salida:
-          type: string
-          format: time
-          description: Horario de salida.
-        dias_laborales:
-          type: string
-          description: Días laborables de la semana.
+          $ref: '#/components/schemas/EstadoFuncionario'
         telefono:
           type: string
-          description: Número de teléfono.
-        contacto_emergencia:
-          type: string
-          description: Contacto de emergencia.
-      required:
-        - numero_documento
-        - pais_documento_id
-        - pais_origen_id
-        - fecha_ingreso
-        - estado
-        - telefono
-
-    FuncionarioPost:
+          title: Telefono
       type: object
-      properties:
-        numero_documento:
-          type: string
-          description: Número de identificación del funcionario.
-        pais_documento_id:
-          type: integer
-          description: ID del país emisor del documento.
-        pais_origen_id:
-          type: integer
-          description: ID del país de origen o nacionalidad.
-        estado_civil:
-          type: string
-          enum:
-            - casado
-            - soltero
-            - viudo
-            - union_de_hecho
-          description: Estado civil del funcionario.
-        fecha_ingreso:
-          type: string
-          format: date
-          description: Fecha en que el funcionario ingresó a la empresa.
-        direccion:
-          type: string
-          description: Dirección de residencia del funcionario.
-        ciudad_id:
-          type: integer
-          description: ID de la ciudad donde reside el funcionario.
-        correo_electronico:
-          type: string
-          format: email
-          description: Correo electrónico del funcionario.
-        fecha_ingreso_seguro_social:
-          type: string
-          format: date
-          description: Fecha de ingreso al seguro social.
-        fecha_egreso:
-          type: string
-          format: date
-          description: Fecha de egreso de la empresa.
-        estado:
-          type: string
-          enum:
-            - activo
-            - inactivo
-          description: Estado actual del funcionario.
-        numero_cuenta_bancaria:
-          type: string
-          description: Número de cuenta bancaria del funcionario.
-        tipo_contrato_id:
-          type: integer
-          description: ID del tipo de contrato.
-        cargo_id:
-          type: integer
-          description: ID del cargo actual.
-        fecha_asuncion_cargo:
-          type: string
-          format: date
-          description: Fecha de inicio en el cargo actual.
-        horario_ingreso:
-          type: string
-          format: time
-          description: Horario de ingreso.
-        horario_salida:
-          type: string
-          format: time
-          description: Horario de salida.
-        dias_laborales:
-          type: string
-          description: Días laborables de la semana.
-        telefono:
-          type: string
-          description: Número de teléfono.
-        contacto_emergencia:
-          type: string
-          description: Contacto de emergencia.
       required:
-        - numero_documento
-        - pais_documento_id
-        - pais_origen_id
-        - fecha_ingreso
-        - estado
-        - telefono
-
+      - id
+      - numero_documento
+      - nombres
+      - apellidos
+      - pais_documento_id
+      - pais_origen_id
+      - fecha_ingreso
+      - estado
+      - telefono
+      title: Funcionario
     FuncionarioPatch:
-      type: object
       properties:
+        estado_civil:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoCivil'
+          - type: 'null'
+        direccion:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Direccion
+        ciudad_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ciudad Id
+        correo_electronico:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Correo Electronico
+        fecha_ingreso_seguro_social:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso Seguro Social
+        fecha_egreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Egreso
+        numero_cuenta_bancaria:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Numero Cuenta Bancaria
+        tipo_contrato_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tipo Contrato Id
+        contacto_emergencia:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Contacto Emergencia
+        numero_documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Numero Documento
+        nombres:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Nombres
+        apellidos:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Apellidos
+        pais_documento_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pais Documento Id
+        pais_origen_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pais Origen Id
+        fecha_ingreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso
+        estado:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoFuncionario'
+          - type: 'null'
+        telefono:
+          anyOf:
+          - type: string
+            maxLength: 20
+            minLength: 6
+          - type: 'null'
+          title: Telefono
+      type: object
+      title: FuncionarioPatch
+    FuncionarioPost:
+      properties:
+        estado_civil:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoCivil'
+          - type: 'null'
+        direccion:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Direccion
+        ciudad_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ciudad Id
+        correo_electronico:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Correo Electronico
+        fecha_ingreso_seguro_social:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso Seguro Social
+        fecha_egreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Egreso
+        numero_cuenta_bancaria:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Numero Cuenta Bancaria
+        tipo_contrato_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tipo Contrato Id
+        contacto_emergencia:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Contacto Emergencia
         numero_documento:
           type: string
-          description: Número de identificación del funcionario.
+          maxLength: 50
+          minLength: 1
+          title: Numero Documento
+        nombres:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Nombres
+        apellidos:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Apellidos
         pais_documento_id:
           type: integer
-          description: ID del país emisor del documento.
+          title: Pais Documento Id
         pais_origen_id:
           type: integer
-          description: ID del país de origen o nacionalidad.
-        estado_civil:
-          type: string
-          enum:
-            - casado
-            - soltero
-            - viudo
-            - union_de_hecho
-          description: Estado civil del funcionario.
+          title: Pais Origen Id
         fecha_ingreso:
           type: string
           format: date
-          description: Fecha en que el funcionario ingresó a la empresa.
-        direccion:
-          type: string
-          description: Dirección de residencia del funcionario.
-        ciudad_id:
-          type: integer
-          description: ID de la ciudad donde reside el funcionario.
-        correo_electronico:
-          type: string
-          format: email
-          description: Correo electrónico del funcionario.
-        fecha_ingreso_seguro_social:
-          type: string
-          format: date
-          description: Fecha de ingreso al seguro social.
-        fecha_egreso:
-          type: string
-          format: date
-          description: Fecha de egreso de la empresa.
+          title: Fecha Ingreso
         estado:
-          type: string
-          enum:
-            - activo
-            - inactivo
-          description: Estado actual del funcionario.
-        numero_cuenta_bancaria:
-          type: string
-          description: Número de cuenta bancaria del funcionario.
-        tipo_contrato_id:
-          type: integer
-          description: ID del tipo de contrato.
-        cargo_id:
-          type: integer
-          description: ID del cargo actual.
-        fecha_asuncion_cargo:
-          type: string
-          format: date
-          description: Fecha de inicio en el cargo actual.
-        horario_ingreso:
-          type: string
-          format: time
-          description: Horario de ingreso.
-        horario_salida:
-          type: string
-          format: time
-          description: Horario de salida.
-        dias_laborales:
-          type: string
-          description: Días laborables de la semana.
+          $ref: '#/components/schemas/EstadoFuncionario'
         telefono:
           type: string
-          description: Número de teléfono.
-        contacto_emergencia:
-          type: string
-          description: Contacto de emergencia.
-
-    Hijo:
+          maxLength: 20
+          minLength: 6
+          title: Telefono
       type: object
+      required:
+      - numero_documento
+      - nombres
+      - apellidos
+      - pais_documento_id
+      - pais_origen_id
+      - fecha_ingreso
+      - estado
+      - telefono
+      title: FuncionarioPost
+    HTTPValidationError:
       properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Hijo:
+      properties:
+        funcionario_id:
+          type: integer
+          title: Funcionario Id
+        nombre:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Nombre
+        fecha_nacimiento:
+          type: string
+          format: date
+          title: Fecha Nacimiento
+        documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Documento
+        apto_bonificacion:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apto Bonificacion
         id:
           type: integer
-          format: int32
-          description: ID único del registro del hijo.
-        funcionario_id:
-          type: integer
-          description: ID del funcionario asociado al hijo.
-        nombre:
-          type: string
-          description: Nombre del hijo.
-        fecha_nacimiento:
-          type: string
-          format: date
-          description: Fecha de nacimiento del hijo.
-        documento:
-          type: string
-          description: Número de documento de identificación del hijo.
-        apto_bonificacion:
-          type: boolean
-          description: Indica si el hijo es apto para bonificaciones.
-      required:
-        - funcionario_id
-        - nombre
-        - fecha_nacimiento
-
-    HijoPost:
+          title: Id
       type: object
-      properties:
-        funcionario_id:
-          type: integer
-          description: ID del funcionario asociado al hijo.
-        nombre:
-          type: string
-          description: Nombre del hijo.
-        fecha_nacimiento:
-          type: string
-          format: date
-          description: Fecha de nacimiento del hijo.
-        documento:
-          type: string
-          description: Número de documento de identificación del hijo.
-        apto_bonificacion:
-          type: boolean
-          description: Indica si el hijo es apto para bonificaciones.
       required:
-        - funcionario_id
-        - nombre
-        - fecha_nacimiento
-
+      - funcionario_id
+      - nombre
+      - fecha_nacimiento
+      - id
+      title: Hijo
     HijoPatch:
+      properties:
+        funcionario_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Funcionario Id
+        nombre:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Nombre
+        fecha_nacimiento:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Nacimiento
+        documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Documento
+        apto_bonificacion:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apto Bonificacion
       type: object
+      title: HijoPatch
+    HijoPost:
       properties:
         funcionario_id:
           type: integer
-          description: ID del funcionario asociado al hijo.
+          title: Funcionario Id
         nombre:
           type: string
-          description: Nombre del hijo.
+          maxLength: 100
+          minLength: 1
+          title: Nombre
         fecha_nacimiento:
           type: string
           format: date
-          description: Fecha de nacimiento del hijo.
+          title: Fecha Nacimiento
         documento:
-          type: string
-          description: Número de documento de identificación del hijo.
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Documento
         apto_bonificacion:
-          type: boolean
-          description: Indica si el hijo es apto para bonificaciones.
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apto Bonificacion
+      type: object
+      required:
+      - funcionario_id
+      - nombre
+      - fecha_nacimiento
+      title: HijoPost
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
+servers:
+- url: /api/funcionarios
+  description: Detrás de Kong

@@ -1,5 +1,5 @@
 import enum
-from datetime import date, time
+from datetime import date
 
 from sqlalchemy import CheckConstraint, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -30,6 +30,8 @@ class Funcionario(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     numero_documento: Mapped[str] = mapped_column(String(50), unique=True)
+    nombres: Mapped[str] = mapped_column(String(100))
+    apellidos: Mapped[str] = mapped_column(String(100), index=True)
     pais_documento_id: Mapped[int]
     pais_origen_id: Mapped[int]
     estado_civil: Mapped[EstadoCivil | None] = mapped_column(Enum(EstadoCivil, name="estado_civil"))
@@ -44,11 +46,6 @@ class Funcionario(Base):
     )
     numero_cuenta_bancaria: Mapped[str | None] = mapped_column(String(50))
     tipo_contrato_id: Mapped[int | None]
-    cargo_id: Mapped[int | None] = mapped_column(index=True)
-    fecha_asuncion_cargo: Mapped[date | None]
-    horario_ingreso: Mapped[time | None]
-    horario_salida: Mapped[time | None]
-    dias_laborales: Mapped[str | None] = mapped_column(String(100))
     telefono: Mapped[str] = mapped_column(String(20))
     contacto_emergencia: Mapped[str | None] = mapped_column(String(100))
 

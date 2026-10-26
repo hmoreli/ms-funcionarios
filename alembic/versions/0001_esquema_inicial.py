@@ -2,7 +2,7 @@
 
 Revision ID: 0001
 Revises: 
-Create Date: 2026-10-25 20:02:14.277357
+Create Date: 2026-10-26 14:34:19.522895
 """
 from collections.abc import Sequence
 
@@ -21,6 +21,8 @@ def upgrade() -> None:
     op.create_table('funcionario',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('numero_documento', sa.String(length=50), nullable=False),
+    sa.Column('nombres', sa.String(length=100), nullable=False),
+    sa.Column('apellidos', sa.String(length=100), nullable=False),
     sa.Column('pais_documento_id', sa.Integer(), nullable=False),
     sa.Column('pais_origen_id', sa.Integer(), nullable=False),
     sa.Column('estado_civil', sa.Enum('casado', 'soltero', 'viudo', 'union_de_hecho', name='estado_civil'), nullable=True),
@@ -33,11 +35,6 @@ def upgrade() -> None:
     sa.Column('estado', sa.Enum('activo', 'inactivo', name='estado_funcionario'), nullable=False),
     sa.Column('numero_cuenta_bancaria', sa.String(length=50), nullable=True),
     sa.Column('tipo_contrato_id', sa.Integer(), nullable=True),
-    sa.Column('cargo_id', sa.Integer(), nullable=True),
-    sa.Column('fecha_asuncion_cargo', sa.Date(), nullable=True),
-    sa.Column('horario_ingreso', sa.Time(), nullable=True),
-    sa.Column('horario_salida', sa.Time(), nullable=True),
-    sa.Column('dias_laborales', sa.String(length=100), nullable=True),
     sa.Column('telefono', sa.String(length=20), nullable=False),
     sa.Column('contacto_emergencia', sa.String(length=100), nullable=True),
     sa.CheckConstraint('fecha_egreso IS NULL OR fecha_egreso >= fecha_ingreso', name=op.f('ck_funcionario_egreso')),
@@ -45,7 +42,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('correo_electronico', name=op.f('uq_funcionario_correo_electronico')),
     sa.UniqueConstraint('numero_documento', name=op.f('uq_funcionario_numero_documento'))
     )
-    op.create_index(op.f('ix_funcionario_cargo_id'), 'funcionario', ['cargo_id'], unique=False)
+    op.create_index(op.f('ix_funcionario_apellidos'), 'funcionario', ['apellidos'], unique=False)
     op.create_index(op.f('ix_funcionario_estado'), 'funcionario', ['estado'], unique=False)
     op.create_table('hijo',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -67,7 +64,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_hijo_funcionario_id'), table_name='hijo')
     op.drop_table('hijo')
     op.drop_index(op.f('ix_funcionario_estado'), table_name='funcionario')
-    op.drop_index(op.f('ix_funcionario_cargo_id'), table_name='funcionario')
+    op.drop_index(op.f('ix_funcionario_apellidos'), table_name='funcionario')
     op.drop_table('funcionario')
     # ### end Alembic commands ###
     sa.Enum(name='estado_civil').drop(op.get_bind(), checkfirst=True)

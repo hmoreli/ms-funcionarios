@@ -7,9 +7,12 @@ Implementa el contrato [`contrato/openapi.yaml`](contrato/openapi.yaml) con Fast
 ## Respecto al contrato
 
 - `DELETE /funcionarios/{id}` es una **baja lógica**: pasa a `inactivo` y completa `fecha_egreso` con la fecha del día. El legajo no se borra.
-- Filtros: `/funcionarios?estado=activo&cargo_id=&numero_documento=`, `/hijos?funcionario_id=`.
+- Filtros: `/funcionarios?estado=activo&numero_documento=&q=` (`q` busca en nombres, apellidos y documento), `/hijos?funcionario_id=`.
+- `nombres` y `apellidos` son obligatorios.
+- El cargo actual no está acá: lo maneja ms-desempeno (`/historicos-cargo` y `/cargos-actuales`). Los horarios los maneja ms-asistencia.
+- La cuenta bancaria solo la ven `rrhh-operador` y `nomina-liquidador`; al resto le llega vacía.
 - Valida email, `fecha_egreso >= fecha_ingreso` y documento único (409 si se repite).
-- Los `*_id` de país, ciudad, cargo y tipo de contrato son de ms-organizacion: no hay FK física entre servicios.
+- Los `*_id` de país, ciudad y tipo de contrato son de ms-organizacion: no hay FK física entre servicios.
 
 ## Desarrollo
 
