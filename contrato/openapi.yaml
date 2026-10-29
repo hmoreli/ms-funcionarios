@@ -1,0 +1,824 @@
+# Generado desde el código (app.openapi()). No editar a mano.
+openapi: 3.1.0
+info:
+  title: Microservicio de Gestión de Funcionarios
+  version: 1.0.0
+paths:
+  /funcionarios:
+    post:
+      tags:
+      - Gestión de Funcionarios
+      summary: Crear funcionario
+      operationId: crear__funcionarios_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuncionarioPost'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Gestión de Funcionarios
+      summary: Listar funcionarios
+      operationId: listar_funcionarios_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: estado
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoFuncionario'
+          - type: 'null'
+          title: Estado
+      - name: numero_documento
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Numero Documento
+      - name: q
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          description: Buscar en nombres, apellidos y número de documento
+          title: Q
+        description: Buscar en nombres, apellidos y número de documento
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Cantidad de registros
+          default: 50
+          title: Limit
+        description: Cantidad de registros
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Registros a saltear
+          default: 0
+          title: Offset
+        description: Registros a saltear
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Funcionario'
+                title: Response Listar Funcionarios Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /funcionarios/{id}:
+    patch:
+      tags:
+      - Gestión de Funcionarios
+      summary: Actualizar funcionario
+      operationId: actualizar_funcionarios__id__patch
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuncionarioPatch'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Gestión de Funcionarios
+      summary: Obtener funcionario por ID
+      operationId: obtener_funcionarios__id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Funcionario'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Gestión de Funcionarios
+      summary: Dar de baja un funcionario
+      description: 'No borra el legajo: lo pasa a `inactivo` y completa `fecha_egreso` con hoy si
+
+        estaba vacía. Así no se pierde el historial que usan nómina y vacaciones.'
+      operationId: dar_de_baja_funcionarios__id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /hijos:
+    get:
+      tags:
+      - Gestión de Hijos
+      summary: Listar hijos
+      operationId: listar_hijos_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Cantidad de registros
+          default: 50
+          title: Limit
+        description: Cantidad de registros
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Registros a saltear
+          default: 0
+          title: Offset
+        description: Registros a saltear
+      - name: funcionario_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Filtrar por funcionario_id
+          title: Funcionario Id
+        description: Filtrar por funcionario_id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Hijo'
+                title: Response Listar Hijos Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Gestión de Hijos
+      summary: Crear hijo
+      operationId: crear__hijos_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HijoPost'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hijo'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /hijos/{id}:
+    get:
+      tags:
+      - Gestión de Hijos
+      summary: Obtener hijo por ID
+      operationId: obtener_hijos__id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hijo'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - Gestión de Hijos
+      summary: Actualizar hijo
+      operationId: actualizar_hijos__id__patch
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HijoPatch'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hijo'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Gestión de Hijos
+      summary: Eliminar hijo
+      operationId: eliminar_hijos__id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    EstadoCivil:
+      type: string
+      enum:
+      - casado
+      - soltero
+      - viudo
+      - union_de_hecho
+      title: EstadoCivil
+    EstadoFuncionario:
+      type: string
+      enum:
+      - activo
+      - inactivo
+      title: EstadoFuncionario
+    Funcionario:
+      properties:
+        estado_civil:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoCivil'
+          - type: 'null'
+        direccion:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Direccion
+        ciudad_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ciudad Id
+        correo_electronico:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Correo Electronico
+        fecha_ingreso_seguro_social:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso Seguro Social
+        fecha_egreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Egreso
+        numero_cuenta_bancaria:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Numero Cuenta Bancaria
+        entidad_bancaria_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Entidad Bancaria Id
+        tipo_contrato_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tipo Contrato Id
+        contacto_emergencia:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Contacto Emergencia
+        id:
+          type: integer
+          title: Id
+        numero_documento:
+          type: string
+          title: Numero Documento
+        nombres:
+          type: string
+          title: Nombres
+        apellidos:
+          type: string
+          title: Apellidos
+        pais_documento_id:
+          type: integer
+          title: Pais Documento Id
+        pais_origen_id:
+          type: integer
+          title: Pais Origen Id
+        fecha_ingreso:
+          type: string
+          format: date
+          title: Fecha Ingreso
+        estado:
+          $ref: '#/components/schemas/EstadoFuncionario'
+        telefono:
+          type: string
+          title: Telefono
+      type: object
+      required:
+      - id
+      - numero_documento
+      - nombres
+      - apellidos
+      - pais_documento_id
+      - pais_origen_id
+      - fecha_ingreso
+      - estado
+      - telefono
+      title: Funcionario
+    FuncionarioPatch:
+      properties:
+        estado_civil:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoCivil'
+          - type: 'null'
+        direccion:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Direccion
+        ciudad_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ciudad Id
+        correo_electronico:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Correo Electronico
+        fecha_ingreso_seguro_social:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso Seguro Social
+        fecha_egreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Egreso
+        numero_cuenta_bancaria:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Numero Cuenta Bancaria
+        entidad_bancaria_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Entidad Bancaria Id
+        tipo_contrato_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tipo Contrato Id
+        contacto_emergencia:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Contacto Emergencia
+        numero_documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Numero Documento
+        nombres:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Nombres
+        apellidos:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Apellidos
+        pais_documento_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pais Documento Id
+        pais_origen_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pais Origen Id
+        fecha_ingreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso
+        estado:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoFuncionario'
+          - type: 'null'
+        telefono:
+          anyOf:
+          - type: string
+            pattern: ^[1-9][0-9]{7,14}$
+            description: Código de país seguido del número, solo dígitos (p. ej. 595981123456)
+            examples:
+            - '595981123456'
+          - type: 'null'
+          title: Telefono
+      type: object
+      title: FuncionarioPatch
+    FuncionarioPost:
+      properties:
+        estado_civil:
+          anyOf:
+          - $ref: '#/components/schemas/EstadoCivil'
+          - type: 'null'
+        direccion:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Direccion
+        ciudad_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ciudad Id
+        correo_electronico:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Correo Electronico
+        fecha_ingreso_seguro_social:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Ingreso Seguro Social
+        fecha_egreso:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Egreso
+        numero_cuenta_bancaria:
+          anyOf:
+          - type: string
+            maxLength: 50
+          - type: 'null'
+          title: Numero Cuenta Bancaria
+        entidad_bancaria_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Entidad Bancaria Id
+        tipo_contrato_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tipo Contrato Id
+        contacto_emergencia:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Contacto Emergencia
+        numero_documento:
+          type: string
+          maxLength: 50
+          minLength: 1
+          title: Numero Documento
+        nombres:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Nombres
+        apellidos:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Apellidos
+        pais_documento_id:
+          type: integer
+          title: Pais Documento Id
+        pais_origen_id:
+          type: integer
+          title: Pais Origen Id
+        fecha_ingreso:
+          type: string
+          format: date
+          title: Fecha Ingreso
+        estado:
+          $ref: '#/components/schemas/EstadoFuncionario'
+        telefono:
+          type: string
+          pattern: ^[1-9][0-9]{7,14}$
+          title: Telefono
+          description: Código de país seguido del número, solo dígitos (p. ej. 595981123456)
+          examples:
+          - '595981123456'
+      type: object
+      required:
+      - numero_documento
+      - nombres
+      - apellidos
+      - pais_documento_id
+      - pais_origen_id
+      - fecha_ingreso
+      - estado
+      - telefono
+      title: FuncionarioPost
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Hijo:
+      properties:
+        funcionario_id:
+          type: integer
+          title: Funcionario Id
+        nombre:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Nombre
+        fecha_nacimiento:
+          type: string
+          format: date
+          title: Fecha Nacimiento
+        documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Documento
+        apto_bonificacion:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apto Bonificacion
+        id:
+          type: integer
+          title: Id
+      type: object
+      required:
+      - funcionario_id
+      - nombre
+      - fecha_nacimiento
+      - id
+      title: Hijo
+    HijoPatch:
+      properties:
+        funcionario_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Funcionario Id
+        nombre:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Nombre
+        fecha_nacimiento:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Fecha Nacimiento
+        documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Documento
+        apto_bonificacion:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apto Bonificacion
+      type: object
+      title: HijoPatch
+    HijoPost:
+      properties:
+        funcionario_id:
+          type: integer
+          title: Funcionario Id
+        nombre:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Nombre
+        fecha_nacimiento:
+          type: string
+          format: date
+          title: Fecha Nacimiento
+        documento:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Documento
+        apto_bonificacion:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apto Bonificacion
+      type: object
+      required:
+      - funcionario_id
+      - nombre
+      - fecha_nacimiento
+      title: HijoPost
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
+servers:
+- url: /api/funcionarios
+  description: Detrás de Kong

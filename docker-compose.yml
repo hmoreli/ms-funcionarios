@@ -1,0 +1,27 @@
+# Requiere la plataforma levantada (repo rrhh-plataforma) y rrhh-common
+# clonado al lado de este repo: ../rrhh-common
+services:
+  ms-funcionarios:
+    build:
+      context: .
+      additional_contexts:
+        rrhh-common: ../rrhh-common
+    environment:
+      DATABASE_URL: postgresql+psycopg://ms_funcionarios:${SERVICIOS_DB_PASSWORD:-servicio-dev}@postgres:5432/rrhh
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/rrhh
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/rrhh/protocol/openid-connect/certs
+      KEYCLOAK_AUDIENCE: rrhh-api
+      # Client de Keycloak del servicio, para consultar a otros servicios si un id existe.
+      SERVICIO_CLIENT_ID: ms-funcionarios
+      SERVICIO_CLIENT_SECRET: ${MS_FUNCIONARIOS_SECRET:-ms-funcionarios-dev}
+      ROOT_PATH: /api/funcionarios
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/salud')"]
+      interval: 10s
+      retries: 5
+    restart: unless-stopped
+    networks: [rrhh]
+
+networks:
+  rrhh:
+    external: true
