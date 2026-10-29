@@ -1,5 +1,8 @@
-from datetime import date
+from datetime import date, timedelta
 
+import pytest
+
+from app.fechas import hoy
 from tests.conftest import CONSULTA, OPERADOR, encabezado, validador_simulado
 
 BASE = {
@@ -10,7 +13,7 @@ BASE = {
     "pais_origen_id": 1,
     "fecha_ingreso": "2024-03-01",
     "estado": "activo",
-    "telefono": "0981123456",
+    "telefono": "595981123456",
 }
 
 
@@ -105,7 +108,7 @@ def test_rutas_del_contrato_existen(cliente):
 
 
 def test_cuenta_bancaria_solo_para_rrhh_y_nomina(cliente):
-    f = alta(cliente, numero_cuenta_bancaria="000-123456-7")
+    f = alta(cliente, numero_cuenta_bancaria="000-123456-7", entidad_bancaria_id=3)
     nomina = encabezado("nomina-liquidador")
     assert (
         cliente.get(f"/funcionarios/{f['id']}", headers=OPERADOR).json()["numero_cuenta_bancaria"]
@@ -146,6 +149,61 @@ def test_valida_ids_de_ms_organizacion(cliente):
         headers=OPERADOR,
     )
     assert r.status_code == 422
-    assert r.json()["detalles"] == [
-        {"campo": "body.pais_origen_id", "mensaje": "No existe el país 7"}
-    ]
+    assert r.json()["detalles"] == [{"campo": "body.pais_origen_id", "mensaje": "País 7 no existe"}]
+
+
+@pytest.mark.parametrize("telefono", ["0981123456", "+595981123456", "595 981 123", "PY981123456"])
+def test_telefono_con_codigo_de_pais_y_solo_digitos(cliente, telefono):
+    r = cliente.post("/funcionarios", json={**BASE, "telefono": telefono}, headers=OPERADOR)
+    assert r.status_code == 422
+    assert r.json()["detalles"][0]["campo"] == "body.telefono"
+
+
+def test_fechas_no_pueden_ser_futuras(cliente):
+    manana = (hoy() + timedelta(days=1)).isoformat()
+    for campo in ("fecha_ingreso", "fecha_ingreso_seguro_social"):
+        r = cliente.post("/funcionarios", json={**BASE, campo: manana}, headers=OPERADOR)
+        assert r.status_code == 422, campo
+    alta(cliente, fecha_ingreso=hoy().isoformat(), fecha_ingreso_seguro_social=hoy().isoformat())
+
+
+def test_ips_no_antes_del_ingreso(cliente):
+    r = cliente.post(
+        "/funcionarios",
+        json={**BASE, "fecha_ingreso_seguro_social": "2024-02-29"},
+        headers=OPERADOR,
+    )
+    assert r.status_code == 422
+    assert "IPS" in r.json()["detalles"][0]["mensaje"]
+    f = alta(cliente, fecha_ingreso_seguro_social="2024-03-01")
+    # En la modificación se valida contra lo ya guardado.
+    r = cliente.patch(
+        f"/funcionarios/{f['id']}", json={"fecha_ingreso": "2024-04-01"}, headers=OPERADOR
+    )
+    assert r.status_code == 422
+    assert r.json()["detalles"][0]["campo"] == "body.fecha_ingreso_seguro_social"
+    r = cliente.patch(
+        f"/funcionarios/{f['id']}",
+        json={"fecha_ingreso": "2024-04-01", "fecha_ingreso_seguro_social": "2024-04-15"},
+        headers=OPERADOR,
+    )
+    assert r.status_code == 200, r.text
+
+
+def test_cuenta_bancaria_requiere_entidad(cliente):
+    r = cliente.post(
+        "/funcionarios", json={**BASE, "numero_cuenta_bancaria": "123"}, headers=OPERADOR
+    )
+    assert r.status_code == 422
+    f = alta(cliente)
+    r = cliente.patch(
+        f"/funcionarios/{f['id']}", json={"numero_cuenta_bancaria": "123"}, headers=OPERADOR
+    )
+    assert r.json()["detalles"][0]["campo"] == "body.entidad_bancaria_id"
+    cliente.app.state.referencias = validador_simulado("ms-organizacion/entidades-bancarias/2")
+    r = cliente.patch(
+        f"/funcionarios/{f['id']}",
+        json={"numero_cuenta_bancaria": "123", "entidad_bancaria_id": 9},
+        headers=OPERADOR,
+    )
+    assert r.json()["detalles"][0]["mensaje"] == "Entidad bancaria 9 no existe"

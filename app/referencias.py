@@ -9,4 +9,8 @@ TIPO_CONTRATO = Referencia(
     "tipo_contrato_id", "organizacion", "/tipos-contrato/{id}", "tipo de contrato"
 )
 
-FUNCIONARIO = (PAIS_DOCUMENTO, PAIS_ORIGEN, CIUDAD, TIPO_CONTRATO)
+ENTIDAD_BANCARIA = Referencia(
+    "entidad_bancaria_id", "organizacion", "/entidades-bancarias/{id}", "entidad bancaria"
+)
+
+FUNCIONARIO = (PAIS_DOCUMENTO, PAIS_ORIGEN, CIUDAD, TIPO_CONTRATO, ENTIDAD_BANCARIA)

@@ -16,6 +16,7 @@ dependencies = [
     "alembic>=1.13",
     "psycopg[binary]>=3.2",
     "email-validator>=2.1",
+    "tzdata",
 ]
 
 [project.optional-dependencies]

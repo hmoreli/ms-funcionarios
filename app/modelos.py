@@ -20,12 +20,16 @@ class EstadoFuncionario(enum.StrEnum):
 
 
 class Funcionario(Base):
-    """Legajo base. Los *_id de país, ciudad, cargo y tipo de contrato apuntan a
+    """Legajo base. Los *_id de país, ciudad, entidad bancaria y tipo de contrato apuntan a
     ms-organizacion: no hay FK física entre servicios."""
 
     __tablename__ = "funcionario"
     __table_args__ = (
         CheckConstraint("fecha_egreso IS NULL OR fecha_egreso >= fecha_ingreso", name="egreso"),
+        CheckConstraint(
+            "fecha_ingreso_seguro_social IS NULL OR fecha_ingreso_seguro_social >= fecha_ingreso",
+            name="ingreso_ips",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -45,6 +49,7 @@ class Funcionario(Base):
         Enum(EstadoFuncionario, name="estado_funcionario"), index=True
     )
     numero_cuenta_bancaria: Mapped[str | None] = mapped_column(String(50))
+    entidad_bancaria_id: Mapped[int | None]
     tipo_contrato_id: Mapped[int | None]
     telefono: Mapped[str] = mapped_column(String(20))
     contacto_emergencia: Mapped[str | None] = mapped_column(String(100))

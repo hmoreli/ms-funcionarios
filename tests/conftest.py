@@ -1,4 +1,5 @@
 import time
+import zoneinfo
 from collections.abc import Iterator
 
 import httpx
@@ -14,6 +15,9 @@ from sqlalchemy.pool import StaticPool
 import app.modelos  # noqa: F401
 from app.db import Base, obtener_sesion
 from app.main import crear_app
+
+# Mismas zonas horarias que en producción (paquete tzdata, ver Dockerfile).
+zoneinfo.reset_tzpath([])
 
 ISSUER = "http://localhost:8080/realms/rrhh"
 CLAVE = rsa.generate_private_key(public_exponent=65537, key_size=2048)

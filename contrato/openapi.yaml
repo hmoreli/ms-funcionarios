@@ -412,6 +412,11 @@ components:
             maxLength: 50
           - type: 'null'
           title: Numero Cuenta Bancaria
+        entidad_bancaria_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Entidad Bancaria Id
         tipo_contrato_id:
           anyOf:
           - type: integer
@@ -503,6 +508,11 @@ components:
             maxLength: 50
           - type: 'null'
           title: Numero Cuenta Bancaria
+        entidad_bancaria_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Entidad Bancaria Id
         tipo_contrato_id:
           anyOf:
           - type: integer
@@ -558,8 +568,10 @@ components:
         telefono:
           anyOf:
           - type: string
-            maxLength: 20
-            minLength: 6
+            pattern: ^[1-9][0-9]{7,14}$
+            description: Código de país seguido del número, solo dígitos (p. ej. 595981123456)
+            examples:
+            - '595981123456'
           - type: 'null'
           title: Telefono
       type: object
@@ -605,6 +617,11 @@ components:
             maxLength: 50
           - type: 'null'
           title: Numero Cuenta Bancaria
+        entidad_bancaria_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Entidad Bancaria Id
         tipo_contrato_id:
           anyOf:
           - type: integer
@@ -645,9 +662,11 @@ components:
           $ref: '#/components/schemas/EstadoFuncionario'
         telefono:
           type: string
-          maxLength: 20
-          minLength: 6
+          pattern: ^[1-9][0-9]{7,14}$
           title: Telefono
+          description: Código de país seguido del número, solo dígitos (p. ej. 595981123456)
+          examples:
+          - '595981123456'
       type: object
       required:
       - numero_documento

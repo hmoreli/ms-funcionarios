@@ -1,6 +1,9 @@
 FROM python:3.12.7-slim
 
 WORKDIR /srv
+# Usar las zonas horarias del paquete tzdata (actualizado por pip) y no las del sistema,
+# que en la imagen base pueden estar viejas (p. ej. Paraguay es UTC-3 fijo desde 2024).
+ENV PYTHONTZPATH=""
 # rrhh-common llega como contexto adicional (ver docker-compose.yml).
 COPY --from=rrhh-common . /tmp/rrhh-common
 RUN pip install --no-cache-dir "/tmp/rrhh-common[db]"

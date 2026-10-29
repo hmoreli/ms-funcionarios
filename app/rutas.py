@@ -1,14 +1,17 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from rrhh_common import Paginacion, Usuario, requiere_roles
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi.exceptions import RequestValidationError
+from rrhh_common import Paginacion, Usuario, requiere_roles, verificar_referencias
 from rrhh_common.crud import ROLES_ESCRITURA, ROLES_LECTURA, router_crud
 from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import esquemas as e
 from app import modelos as m
 from app.db import obtener_sesion
+from app.fechas import errores_de_fechas
 from app.referencias import FUNCIONARIO
 
 # Roles que pueden ver la cuenta bancaria; el resto (p. ej. consulta) la recibe vacía.
@@ -25,9 +28,9 @@ funcionarios = router_crud(
     nombre="Funcionario",
     sesion=obtener_sesion,
     referencias=FUNCIONARIO,
-    # Los listados se arman abajo (ocultan la cuenta bancaria según el rol);
-    # DELETE se reemplaza por una baja lógica.
-    metodos={"crear", "actualizar"},
+    # Los listados se arman abajo (ocultan la cuenta bancaria según el rol), el PATCH
+    # valida las fechas contra lo ya guardado y DELETE se reemplaza por una baja lógica.
+    metodos={"crear"},
 )
 
 
@@ -35,7 +38,53 @@ def _para(usuario: Usuario, funcionario: m.Funcionario) -> e.Funcionario:
     salida = e.Funcionario.model_validate(funcionario)
     if not usuario.tiene_rol(*ROLES_CUENTA):
         salida.numero_cuenta_bancaria = None
+        salida.entidad_bancaria_id = None
     return salida
+
+
+@funcionarios.patch("/{id}", response_model=e.Funcionario, summary="Actualizar funcionario")
+def actualizar(
+    id: int,
+    datos: e.FuncionarioPatch,
+    request: Request,
+    db: Session = Depends(obtener_sesion),
+    _: Usuario = Depends(requiere_roles(*ROLES_ESCRITURA)),
+):
+    funcionario = db.get(m.Funcionario, id)
+    if funcionario is None:
+        raise HTTPException(404, detail="Funcionario no encontrado")
+    cambios = datos.model_dump(exclude_unset=True)
+    verificar_referencias(request, FUNCIONARIO, cambios)
+    # Las reglas cruzan campos: se validan sobre el legajo como quedaría.
+    final = {c: cambios.get(c, getattr(funcionario, c)) for c in e.CAMPOS_CON_REGLAS}
+    errores = [
+        {"type": "regla", "loc": ("body", campo), "msg": mensaje, "input": final[campo]}
+        for campo, mensaje in errores_de_fechas(
+            final["fecha_ingreso"], final["fecha_ingreso_seguro_social"], final["fecha_egreso"]
+        )
+    ]
+    if final["numero_cuenta_bancaria"] and final["entidad_bancaria_id"] is None:
+        errores.append(
+            {
+                "type": "regla",
+                "loc": ("body", "entidad_bancaria_id"),
+                "msg": "Indicá la entidad bancaria de la cuenta",
+                "input": None,
+            }
+        )
+    if errores:
+        raise RequestValidationError(errores)
+    for campo, valor in cambios.items():
+        setattr(funcionario, campo, valor)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            409, detail="Ya existe un funcionario con ese documento o correo"
+        ) from exc
+    db.refresh(funcionario)
+    return funcionario
 
 
 @funcionarios.get("", response_model=list[e.Funcionario], summary="Listar funcionarios")
