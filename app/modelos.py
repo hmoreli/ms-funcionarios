@@ -1,7 +1,7 @@
 import enum
 from datetime import date
 
-from sqlalchemy import CheckConstraint, Enum, ForeignKey, String
+from sqlalchemy import CheckConstraint, Enum, ForeignKey, String, false
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -62,4 +62,4 @@ class Hijo(Base):
     nombre: Mapped[str] = mapped_column(String(100))
     fecha_nacimiento: Mapped[date]
     documento: Mapped[str | None] = mapped_column(String(50), unique=True)
-    apto_bonificacion: Mapped[bool | None]
+    apto_bonificacion: Mapped[bool] = mapped_column(server_default=false())

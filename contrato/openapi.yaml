@@ -709,10 +709,9 @@ components:
           - type: 'null'
           title: Documento
         apto_bonificacion:
-          anyOf:
-          - type: boolean
-          - type: 'null'
+          type: boolean
           title: Apto Bonificacion
+          default: false
         id:
           type: integer
           title: Id
@@ -779,10 +778,9 @@ components:
           - type: 'null'
           title: Documento
         apto_bonificacion:
-          anyOf:
-          - type: boolean
-          - type: 'null'
+          type: boolean
           title: Apto Bonificacion
+          default: false
       type: object
       required:
       - funcionario_id
