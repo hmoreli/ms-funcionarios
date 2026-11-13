@@ -92,6 +92,22 @@ def test_hijos_de_un_funcionario(cliente):
     assert [h["nombre"] for h in lista] == ["Sofía"]
 
 
+def test_hijo_apto_por_defecto_no_y_nacimiento_no_futuro(cliente):
+    f = alta(cliente)
+    h = cliente.post(
+        "/hijos",
+        json={"funcionario_id": f["id"], "nombre": "Juan", "fecha_nacimiento": "2020-01-01"},
+        headers=OPERADOR,
+    )
+    assert h.status_code == 201 and h.json()["apto_bonificacion"] is False
+    r = cliente.post(
+        "/hijos",
+        json={"funcionario_id": f["id"], "nombre": "Ana", "fecha_nacimiento": "2999-01-01"},
+        headers=OPERADOR,
+    )
+    assert r.status_code == 422
+
+
 def test_hijo_de_funcionario_inexistente_409(cliente):
     r = cliente.post(
         "/hijos",

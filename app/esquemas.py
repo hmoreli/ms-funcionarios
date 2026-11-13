@@ -10,6 +10,8 @@ Cambios respecto al contrato original (aprobados con la revisión de contratos v
 - `telefono` en formato internacional: código de país y número, solo dígitos.
 - Las fechas de ingreso y de ingreso a IPS no pueden ser posteriores a hoy, y la de
   IPS no puede ser anterior a la de ingreso.
+- Hijo: `apto_bonificacion` es Sí/No (obligatorio, por defecto No) y la fecha de
+  nacimiento no puede ser posterior a hoy.
 """
 
 from datetime import date
@@ -17,7 +19,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
-from app.fechas import errores_de_fechas
+from app.fechas import errores_de_fechas, hoy
 from app.modelos import EstadoCivil, EstadoFuncionario
 
 Texto50 = Annotated[str, Field(min_length=1, max_length=50)]
@@ -102,12 +104,22 @@ class Funcionario(_CamposFuncionario):
     correo_electronico: str | None = None
 
 
+def _nacimiento_no_futuro(fecha: date | None) -> None:
+    if fecha and fecha > hoy():
+        raise ValueError("La fecha de nacimiento no puede ser posterior a hoy")
+
+
 class HijoPost(BaseModel):
     funcionario_id: int
     nombre: Texto100
     fecha_nacimiento: date
     documento: Texto50 | None = None
-    apto_bonificacion: bool | None = None
+    apto_bonificacion: bool = False
+
+    @model_validator(mode="after")
+    def _reglas(self):
+        _nacimiento_no_futuro(self.fecha_nacimiento)
+        return self
 
 
 class HijoPatch(BaseModel):
@@ -116,6 +128,11 @@ class HijoPatch(BaseModel):
     fecha_nacimiento: date | None = None
     documento: Texto50 | None = None
     apto_bonificacion: bool | None = None
+
+    @model_validator(mode="after")
+    def _reglas(self):
+        _nacimiento_no_futuro(self.fecha_nacimiento)
+        return self
 
 
 class Hijo(HijoPost):
